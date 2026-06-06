@@ -18,23 +18,28 @@ print("embeddings created")
 split_chunks = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=60).split_documents(book)
 vectors = Chroma.from_documents(documents=split_chunks, embedding=embedding_object)
 print("Vectors created")
-retiever = vectors.as_retriever(search_kwargs={"k":3})
-print("Vectors retrieved")
-
-prompt=ChatPromptTemplate.from_template("Answer the question based only on the following context [GIVE ANSWER ONLY]: \n {context} \n Question: {question}")
-print("Prompt created")
-
-parser = StrOutputParser()
+retriever = vectors.as_retriever(seach_kwargs={"k":5})
 model = ChatGroq(model='llama-3.1-8b-instant')
-chain = prompt | model | parser 
+parser = StrOutputParser()
+chat_memory = []
 
+while True:
+    que = input("Ask me: ")
+    retrieved_chunks = retriever.invoke(que)
 
-# ***********NEW***********
-question = input("\nAsk me : ")
-retrieved_chunks = retiever.invoke(question)
-context = '\n\n'.join([doc.page_content for doc in retrieved_chunks])
+    if que.lower() == 'exit':
+        print("Exiting...")
+        break
 
-response = chain.invoke({"context": context, "question": question})
-print("LLM working...")
-
-print("\nAnswer:\n",response)
+    context = '\n\n'.join([chk.page_content for chk in retrieved_chunks])
+    prompt = ChatPromptTemplate.from_template("Answer the question based only on the following context [Give Answer only] \n\n CHAT_HISTORY: {chat_memory} \n\n CONTEXT: {context} \n\n QUESTION: {question}")
+    chain = prompt | model | parser
+    res = chain.invoke({
+        "chat_memory": chat_memory,
+        "context": context,
+        "question": que
+    })
+    print("\nLLM working...\n")
+    print("\nAnswer:\n", res, "\n\n")
+    chat_memory.append(f"User: {que}\nAI:{res}")
+    
