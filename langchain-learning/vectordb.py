@@ -4,6 +4,12 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 chunks = generate_chunks("./books/AOSH.pdf")
 
-# embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
+embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
 
-# vecstore = Chroma.from_documments(document=chunks, embedding=embeddings)
+vecstore = Chroma.from_documents(documents=chunks, embedding=embeddings)
+
+retriever = vecstore.as_retriever(search_kwargs={"k":3})
+
+query="who is sherlock holmes?"
+for doc in retriever.invoke(query):
+    print("\n\n",doc.page_content[:500])
