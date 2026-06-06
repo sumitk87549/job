@@ -13,15 +13,15 @@ from langchain_groq import ChatGroq
 book = PyPDFLoader("./books/AOSH.pdf").load()
 
 embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-print("embeddings created\n")
+print("embeddings created")
 vectors = Chroma.from_documents(documents=book, embedding=embeddings)
-print("Vectors created\n")
+print("Vectors created")
 
 splitter = RecursiveCharacterTextSplitter(chunk_size=600, chunk_overlap=60)
 retiever = vectors.as_retriever(search_kwargs={"k":3})
-print("Vectors retrieved\n")
+print("Vectors retrieved")
 prompt=ChatPromptTemplate.from_template("Answer the question based on the following context [GIVE ANSWER ONLY]: \n {context} \n Question: {question}")
-print("Prompt created\n")
+print("Prompt created")
 
 parser = StrOutputParser()
 model = ChatGroq(model='llama-3.1-8b-instant')
@@ -33,6 +33,6 @@ chain = prompt | model | parser
 retrieved_docs = retiever.invoke(question)
 context = '\n\n'.join([doc.page_content for doc in retrieved_docs])
 response = chain.invoke({"context": context, "question": question})
-print("\nLLM working...\n")
+print("\nLLM working...")
 
 print("\n\nAnswer:\n",response)
