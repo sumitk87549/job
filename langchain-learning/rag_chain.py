@@ -25,7 +25,7 @@ print("Prompt created")
 
 parser = StrOutputParser()
 model = ChatGroq(model='llama-3.1-8b-instant')
-question = input("ask me : ")
+question = input("\nAsk me : ")
 chain = prompt | model | parser 
 
 
@@ -33,6 +33,6 @@ chain = prompt | model | parser
 retrieved_docs = retiever.invoke(question)
 context = '\n\n'.join([doc.page_content for doc in retrieved_docs])
 response = chain.invoke({"context": context, "question": question})
-print("\nLLM working...")
+print("LLM working...")
 
-print("\n\nAnswer:\n",response)
+print("\nAnswer:\n",response)
