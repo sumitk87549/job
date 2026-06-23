@@ -31,7 +31,10 @@ while flow:
     retrieved_chunks = retr.invoke(que)
     context = '\n'.join([a.page_content for a in retrieved_chunks])
 
-    prompt = ChatPromptTemplate.from_template(f"Answer QUESTION based Only on Given CONTEXT and CHAT_HISTORY [return only anwer the questoin without commentary] \n\nCONTEXT:\n {context} \n\nCHAT_HISTORY:\n {chat_memory} \n\nQUESTION:\n{que}")
+    prompt = ChatPromptTemplate.from_messages([f"Answer QUESTION based Only on Given CONTEXT [return only answer of the question without commentary] \n\nCONTEXT:\n {context} \n\nQUESTION:\n{que}",
+                                              MessagesPlaceholder(variable_name="chat_memory"),
+                                              ("human","{input}")
+                                      ])
     parser = StrOutputParser()
 
     chain = prompt | model | parser
